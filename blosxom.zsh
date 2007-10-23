@@ -9,9 +9,6 @@
 
 title="bloszom.zsh"
 
-echo "Content-Type: text/html"
-echo
-
 typeset -a pathinfo
 : ${(A)pathinfo::=${(s:/:)PATH_INFO}}
 
