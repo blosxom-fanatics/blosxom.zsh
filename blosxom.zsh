@@ -12,6 +12,14 @@ title="bloszom.zsh"
 echo "Content-Type: text/html"
 echo
 
+typeset -a pathinfo
+: ${(A)pathinfo::=${(s:/:)PATH_INFO}}
+
+flavour=${(M)pathinfo[$#pathinfo-1]%.*}
+if [[ $flavour == "" ]]; then
+	flavour=".html"
+fi
+
 function template () {
 	template=$(cat $1)
 	typeset -A variables
@@ -26,7 +34,7 @@ function template () {
 	echo $template
 }
 
-template "head.html" title ${(qq)title} home ${(qq)SCRIPT_NAME}
+template "head$flavour" title ${(qq)title} home ${(qq)SCRIPT_NAME}
 
 typeset -a entries
 entries=()
@@ -57,10 +65,11 @@ for f in data/**/*.txt(^Om); do
 	entries+=${(kv)entry}
 done
 
-typeset -a pathinfo
-: ${(A)pathinfo::=${(s:/:)PATH_INFO}}
-
 if [[ $#pathinfo > 0 && "$PATH_INFO" != "" ]]; then
+	pathinfo[$#pathinfo-1] = ${pathinfo[$#pathinfo-1]%.*}
+	if [[ pathinfo[$#pathinfo-1] == "index" ]]; then
+		pathinfo[$#pathinfo-1] =
+	fi
 	for ((i = 1; i < $#entries; i += 1)); do
 		typeset -A entry
 		: ${(AA)entry::=${(z)entries[$i]}}
@@ -74,10 +83,9 @@ for ((i = 1; i < $#entries; i += 1)); do
 	typeset -A entry
 	: ${(AA)entry::=${(z)entries[$i]}}
 	if [[ $entry[path] != "0" ]]; then
-		template "story.html" ${(kv)entry}
+		template "story$flavour" ${(kv)entry}
 	fi
 done
 
-version=`zsh --version`
-template "foot.html" version ${(qq)version}
+template "foot$flavour" version ${(qq)ZSH_VERSION}
 
