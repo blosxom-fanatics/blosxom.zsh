@@ -7,6 +7,8 @@
 # (q) とか (qq) とか (z) とかつかいまくる
 # (qq) は空文字列でも安全
 
+title="bloszom.zsh"
+
 echo "Content-Type: text/html"
 echo
 
@@ -16,7 +18,7 @@ function template () {
 	variables=()
 	: ${(AA)variables::=${(z)*[2,-1]}}
 	for k in ${(k)variables}; do
-		#echo "$k: $variables[$k]"
+	#	echo "$k: $variables[$k]"
 		pat=#{$k}
 		sub=${(Q)variables[$k]}
 		template=${template//$pat/$sub}
@@ -24,7 +26,7 @@ function template () {
 	echo $template
 }
 
-template "head.html" title bbb home aaaaa
+template "head.html" title ${(qq)title} home ${(qq)SCRIPT_NAME}
 
 typeset -a entries
 entries=()
@@ -48,16 +50,32 @@ for f in data/**/*.txt(^Om); do
 		body  ${(qq)body}
 		path  ${(q)f}
 		name  ${(q)${f##data}%%.*}
+
+		home ${(qq)SCRIPT_NAME}
 	)
+
 	entries+=${(kv)entry}
 done
 
-# TODO: フィルタリング
+typeset -a pathinfo
+: ${(A)pathinfo::=${(s:/:)PATH_INFO}}
 
-for ((i = 0; i < $#entries; i += 1)); do
+if [[ $#pathinfo > 0 && "$PATH_INFO" != "" ]]; then
+	for ((i = 1; i < $#entries; i += 1)); do
+		typeset -A entry
+		: ${(AA)entry::=${(z)entries[$i]}}
+		if [[ ${(M)entry[name]#$PATH_INFO} == ""  ]]; then
+			entries[$i]="path 0"
+		fi
+	done
+fi
+
+for ((i = 1; i < $#entries; i += 1)); do
 	typeset -A entry
-	entry=$entries[$i]
-	template "story.html" ${(kv)entry}
+	: ${(AA)entry::=${(z)entries[$i]}}
+	if [[ $entry[path] != "0" ]]; then
+		template "story.html" ${(kv)entry}
+	fi
 done
 
 version=`zsh --version`
