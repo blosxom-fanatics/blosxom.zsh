@@ -1,5 +1,5 @@
-#!/usr/bin/zsh
-# vim:ft=sh:
+#!/usr/bin/env zsh
+# vim:ft=zsh:
 
 # array とかはそのまま関数に渡せない?
 # あと array のなかに array もいれられない?
@@ -18,7 +18,7 @@ if [[ $flavour == "" ]]; then
 fi
 
 function template () {
-	template=$(cat $1)
+	template=$(<$1)
 	typeset -A variables
 	variables=()
 	: ${(AA)variables::=${(z)*[2,-1]}}
@@ -44,7 +44,7 @@ for f in data/**/*.txt(^Om); do
 	typeset -A entry
 	stat -H st +mtime $f
 	strftime -s date "%Y-%m-%d %H:%M:%S" $st[mtime]
-	content=$(cat $f)
+	content=$(<$f)
 	: ${(A)content::=${(f)content}}
 	title=$content[0]
 	body=${(F)content[2,-1]}
