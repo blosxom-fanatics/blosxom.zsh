@@ -1,0 +1,4 @@
+Tips for Zsh
+This post shares some useful tips for Zsh scripting.
+- Use (q) and (qq) for safe quoting
+- Arrays are powerful

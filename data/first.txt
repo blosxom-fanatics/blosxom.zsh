@@ -1,0 +1,3 @@
+First Post
+This is the very first post on my blosxom.zsh blog.
+Welcome to the world of Zsh blogging!
